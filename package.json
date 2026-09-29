@@ -1,0 +1,33 @@
+{
+  "name": "sistem-penjadwalan-labor",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react",
+    "vite",
+    "laboratory",
+    "scheduling"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "Sistem penjadwalan laboratorium",
+  "dependencies": {
+    "bcryptjs": "3.0.2",
+    "cors": "2.8.5",
+    "express": "5.1.0",
+    "jsonwebtoken": "9.0.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "vite": "^7.0.0"
+  }
+}
