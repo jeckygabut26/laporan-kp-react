@@ -5,14 +5,15 @@ import './SchedulePage.css'
 const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
 const emptyForm = {
   kode_labor: '',
+  nama_labor: '',
   hari: '',
   jam: '',
   kelas: '',
   kode_mk: '',
   nama_mk: '',
+  sks: '',
   nama_dosen: '',
   semester: '',
-  tahun_ajar: '',
 }
 
 function SchedulePage() {
@@ -37,8 +38,9 @@ function SchedulePage() {
     return rows.filter((row) => {
       const matchesDay = !day || row.hari === day
       const searchable = [
-        row.kode_labor, row.hari, row.jam, row.kelas, row.kode_mk,
-        row.nama_mk, row.nama_dosen, row.semester, row.tahun_ajar,
+        row.kode_labor, row.nama_labor, row.hari, row.jam, row.kelas,
+        row.kode_mk, row.nama_mk, row.kode_mata_kuliah,
+        row.nama_mata_kuliah, row.sks, row.nama_dosen, row.semester,
       ].join(' ').toLocaleLowerCase('id')
       return matchesDay && (!query || searchable.includes(query))
     })
@@ -256,7 +258,7 @@ function SchedulePage() {
                   </tr>
                 ) : visibleRows.map((row) => (
                   <tr key={row.id}>
-                    <td><span className="schedule-lab-code">{row.kode_labor}</span></td>
+                    <td><span className="schedule-lab-code">{row.kode_labor}</span><span className="schedule-course-code">{row.nama_labor}</span></td>
                     <td className="schedule-day">{row.hari}</td>
                     <td>{row.jam}</td>
                     <td>{row.kelas}</td>
@@ -291,14 +293,15 @@ function SchedulePage() {
           </div>
           <div className="schedule-form-grid">
             <div className="schedule-field"><label htmlFor="kode_labor">Kode laboratorium *</label><input id="kode_labor" name="kode_labor" value={form.kode_labor} onChange={updateField} required maxLength="20" placeholder="LAB-01" /></div>
+            <div className="schedule-field"><label htmlFor="nama_labor">Nama laboratorium *</label><input id="nama_labor" name="nama_labor" value={form.nama_labor} onChange={updateField} required maxLength="100" placeholder="Labor 1" /></div>
             <div className="schedule-field"><label htmlFor="hari">Hari *</label><select id="hari" name="hari" value={form.hari} onChange={updateField} required><option value="">Pilih hari</option>{days.map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="schedule-field"><label htmlFor="jam">Jam *</label><input id="jam" name="jam" value={form.jam} onChange={updateField} required maxLength="30" placeholder="08:00-10:00" /></div>
             <div className="schedule-field"><label htmlFor="kelas">Kelas *</label><input id="kelas" name="kelas" value={form.kelas} onChange={updateField} required maxLength="50" placeholder="TI-1A" /></div>
             <div className="schedule-field"><label htmlFor="kode_mk">Kode mata kuliah *</label><input id="kode_mk" name="kode_mk" value={form.kode_mk} onChange={updateField} required maxLength="30" /></div>
             <div className="schedule-field"><label htmlFor="nama_mk">Nama mata kuliah *</label><input id="nama_mk" name="nama_mk" value={form.nama_mk} onChange={updateField} required maxLength="100" /></div>
+            <div className="schedule-field"><label htmlFor="sks">SKS *</label><input id="sks" name="sks" type="number" min="1" max="8" value={form.sks} onChange={updateField} required /></div>
             <div className="schedule-field wide"><label htmlFor="nama_dosen">Nama dosen *</label><input id="nama_dosen" name="nama_dosen" value={form.nama_dosen} onChange={updateField} required maxLength="100" /></div>
             <div className="schedule-field"><label htmlFor="semester">Semester</label><input id="semester" name="semester" value={form.semester} onChange={updateField} maxLength="20" /></div>
-            <div className="schedule-field"><label htmlFor="tahun_ajar">Tahun ajar</label><input id="tahun_ajar" name="tahun_ajar" value={form.tahun_ajar} onChange={updateField} maxLength="20" placeholder="2025/2026" /></div>
           </div>
           <div className="schedule-form-actions">
             <button className="schedule-button light" type="button" onClick={closeDialog}>Batal</button>

@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { masterDataApi } from '../services/api.js'
 import SchedulePage from './SchedulePage.jsx'
 import './AdminDashboard.css'
 
@@ -23,10 +24,10 @@ const moduleDefinitions = {
     fields: [
       { name: 'nama', label: 'Nama Dosen', placeholder: 'Nama dosen', required: true },
       { name: 'nidn', label: 'NIDN', placeholder: 'Nomor induk dosen', required: true },
-      { name: 'bidang', label: 'Bidang', placeholder: 'Bidang keahlian', required: true },
-      { name: 'status', label: 'Status', type: 'select', options: ['Aktif', 'Tidak aktif'] },
+      { name: 'jurusan', label: 'Jurusan', placeholder: 'Program studi', required: true },
+      { name: 'mata_kuliah', label: 'Mata Kuliah', placeholder: 'Pisahkan beberapa mata kuliah dengan koma', multiple: true },
     ],
-    columns: [{ key: 'nama', label: 'NAMA' }, { key: 'nidn', label: 'NIDN' }, { key: 'bidang', label: 'BIDANG' }, { key: 'status', label: 'STATUS' }],
+    columns: [{ key: 'nama', label: 'NAMA' }, { key: 'nidn', label: 'NIDN' }, { key: 'jurusan', label: 'JURUSAN' }, { key: 'mata_kuliah', label: 'MATA KULIAH' }],
   },
   courses: {
     eyebrow: 'MASTER DATA',
@@ -34,12 +35,14 @@ const moduleDefinitions = {
     description: 'Atur mata kuliah, SKS, semester, dan kelas yang tersedia.',
     formTitle: 'Form Input Mata Kuliah',
     fields: [
-      { name: 'nama', label: 'Nama Mata Kuliah', placeholder: 'Contoh: Basis Data', required: true },
+      { name: 'kode_mk', label: 'Kode Mata Kuliah', placeholder: 'MK001', required: true },
+      { name: 'nama_mk', label: 'Nama Mata Kuliah', placeholder: 'Contoh: Basis Data', required: true },
       { name: 'sks', label: 'SKS', type: 'number', placeholder: '3', required: true },
       { name: 'semester', label: 'Semester', type: 'number', placeholder: '4', required: true },
       { name: 'kelas', label: 'Kelas / Kelompok', placeholder: 'TI-2A' },
+      { name: 'jurusan', label: 'Jurusan', placeholder: 'Teknik Informatika' },
     ],
-    columns: [{ key: 'nama', label: 'MATA KULIAH' }, { key: 'sks', label: 'SKS' }, { key: 'semester', label: 'SEMESTER' }, { key: 'kelas', label: 'KELAS' }],
+    columns: [{ key: 'kode_mk', label: 'KODE' }, { key: 'nama_mk', label: 'MATA KULIAH' }, { key: 'sks', label: 'SKS' }, { key: 'semester', label: 'SEMESTER' }, { key: 'kelas', label: 'KELAS' }, { key: 'jurusan', label: 'JURUSAN' }],
   },
   labs: {
     eyebrow: 'MASTER DATA',
@@ -47,12 +50,12 @@ const moduleDefinitions = {
     description: 'Atur ruang praktik, kapasitas, dan status laboratorium.',
     formTitle: 'Entry Data Laboratorium',
     fields: [
-      { name: 'nama', label: 'Nama Laboratorium', placeholder: 'Contoh: Labor 1', required: true },
+      { name: 'nama_labor', label: 'Nama Laboratorium', placeholder: 'Contoh: Labor 1', required: true },
       { name: 'kapasitas', label: 'Kapasitas', type: 'number', placeholder: '30', required: true },
       { name: 'status', label: 'Status', type: 'select', options: ['Tersedia', 'Digunakan', 'Perawatan'] },
       { name: 'keterangan', label: 'Keterangan', placeholder: 'Keterangan ruang' },
     ],
-    columns: [{ key: 'nama', label: 'LABORATORIUM' }, { key: 'kapasitas', label: 'KAPASITAS' }, { key: 'status', label: 'STATUS' }, { key: 'keterangan', label: 'KETERANGAN' }],
+    columns: [{ key: 'nama_labor', label: 'LABORATORIUM' }, { key: 'kapasitas', label: 'KAPASITAS' }, { key: 'status', label: 'STATUS' }, { key: 'keterangan', label: 'KETERANGAN' }],
   },
   software: {
     eyebrow: 'MASTER DATA',
@@ -60,12 +63,12 @@ const moduleDefinitions = {
     description: 'Catat perangkat lunak dan fasilitas yang tersedia di laboratorium.',
     formTitle: 'Entry Data Software / Perangkat Lunak',
     fields: [
-      { name: 'nama', label: 'Nama Software', placeholder: 'Contoh: Visual Studio Code', required: true },
+      { name: 'nama_software', label: 'Nama Software', placeholder: 'Contoh: Visual Studio Code', required: true },
       { name: 'versi', label: 'Versi', placeholder: 'Latest' },
       { name: 'laboratorium', label: 'Laboratorium', placeholder: 'Labor 1' },
       { name: 'keterangan', label: 'Keterangan', placeholder: 'Status perangkat' },
     ],
-    columns: [{ key: 'nama', label: 'SOFTWARE' }, { key: 'versi', label: 'VERSI' }, { key: 'laboratorium', label: 'LABOR' }, { key: 'keterangan', label: 'KETERANGAN' }],
+    columns: [{ key: 'nama_software', label: 'SOFTWARE' }, { key: 'versi', label: 'VERSI' }, { key: 'laboratorium', label: 'LABOR' }, { key: 'keterangan', label: 'KETERANGAN' }],
   },
   replacements: {
     eyebrow: 'OPERASIONAL',
@@ -73,13 +76,13 @@ const moduleDefinitions = {
     description: 'Catat perubahan jadwal perkuliahan dan status pengajuan.',
     formTitle: 'Form Kuliah Pengganti',
     fields: [
-      { name: 'mataKuliah', label: 'Mata Kuliah', placeholder: 'Nama mata kuliah', required: true },
+      { name: 'mata_kuliah', label: 'Mata Kuliah', placeholder: 'Nama mata kuliah', required: true },
       { name: 'dosen', label: 'Dosen', placeholder: 'Nama dosen', required: true },
-      { name: 'jadwalLama', label: 'Jadwal Lama', placeholder: 'Hari, tanggal, jam', required: true },
-      { name: 'jadwalBaru', label: 'Jadwal Baru', placeholder: 'Hari, tanggal, jam', required: true },
+      { name: 'jadwal_lama', label: 'Jadwal Lama', placeholder: 'Hari, tanggal, jam', required: true },
+      { name: 'jadwal_baru', label: 'Jadwal Baru', placeholder: 'Hari, tanggal, jam', required: true },
       { name: 'status', label: 'Status', type: 'select', options: ['Menunggu', 'Disetujui', 'Ditolak'] },
     ],
-    columns: [{ key: 'mataKuliah', label: 'MATA KULIAH' }, { key: 'dosen', label: 'DOSEN' }, { key: 'jadwalLama', label: 'JADWAL LAMA' }, { key: 'jadwalBaru', label: 'JADWAL BARU' }, { key: 'status', label: 'STATUS' }],
+    columns: [{ key: 'mata_kuliah', label: 'MATA KULIAH' }, { key: 'dosen', label: 'DOSEN' }, { key: 'jadwal_lama', label: 'JADWAL LAMA' }, { key: 'jadwal_baru', label: 'JADWAL BARU' }, { key: 'status', label: 'STATUS' }],
   },
 }
 
@@ -114,32 +117,55 @@ function DashboardHome({ username, onNavigate }) {
 
 function DataModule({ pageId, search }) {
   const config = moduleDefinitions[pageId]
-  const storageKey = `sistem-jadwal-${pageId}`
-  const [rows, setRows] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(storageKey) || '[]')
-    } catch {
-      return []
-    }
-  })
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [loadError, setLoadError] = useState('')
   const [form, setForm] = useState(() => Object.fromEntries(config.fields.map((field) => [field.name, field.options?.[0] || ''])))
   const [notice, setNotice] = useState('')
   const visibleRows = rows.filter((row) => Object.values(row).join(' ').toLocaleLowerCase('id').includes(search.trim().toLocaleLowerCase('id')))
 
-  function saveRecord(event) {
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    setLoadError('')
+    masterDataApi.list(pageId)
+      .then((result) => { if (active) setRows(Array.isArray(result) ? result : []) })
+      .catch((error) => { if (active) setLoadError(error.message) })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [pageId])
+
+  async function saveRecord(event) {
     event.preventDefault()
-    const nextRows = [{ ...form, id: `${Date.now()}` }, ...rows]
-    setRows(nextRows)
-    localStorage.setItem(storageKey, JSON.stringify(nextRows))
-    setForm(Object.fromEntries(config.fields.map((field) => [field.name, field.options?.[0] || ''])))
-    setNotice('Data disimpan pada browser ini.')
-    window.setTimeout(() => setNotice(''), 3000)
+    setSaving(true)
+    setNotice('')
+    try {
+      const payload = Object.fromEntries(config.fields.map((field) => [
+        field.name,
+        field.multiple
+          ? form[field.name].split(',').map((value) => value.trim()).filter(Boolean)
+          : form[field.name],
+      ]))
+      const saved = await masterDataApi.create(pageId, payload)
+      setRows((current) => [saved, ...current])
+      setForm(Object.fromEntries(config.fields.map((field) => [field.name, field.options?.[0] || ''])))
+      setNotice('Data berhasil disimpan ke Supabase.')
+    } catch (error) {
+      setNotice(error.message || 'Data gagal disimpan.')
+    } finally {
+      setSaving(false)
+    }
   }
 
-  function removeRecord(id) {
-    const nextRows = rows.filter((row) => row.id !== id)
-    setRows(nextRows)
-    localStorage.setItem(storageKey, JSON.stringify(nextRows))
+  async function removeRecord(id) {
+    try {
+      await masterDataApi.remove(pageId, id)
+      setRows((current) => current.filter((row) => row.id !== id))
+      setNotice('Data berhasil dihapus dari Supabase.')
+    } catch (error) {
+      setNotice(error.message || 'Data gagal dihapus.')
+    }
   }
 
   return (
@@ -151,12 +177,12 @@ function DataModule({ pageId, search }) {
 
       <div className="module-stats">
         <div><span>Total Data</span><strong>{rows.length}</strong></div>
-        <div><span>Status Data</span><strong>{search ? `${visibleRows.length} cocok` : 'Tersimpan lokal'}</strong></div>
+        <div><span>Status Data</span><strong>{search ? `${visibleRows.length} cocok` : loading ? 'Memuat...' : 'Supabase'}</strong></div>
         <div><span>Modul</span><strong>{config.eyebrow === 'MASTER DATA' ? 'Master' : 'Operasional'}</strong></div>
       </div>
 
       <form className="module-form" onSubmit={saveRecord}>
-        <div className="module-form-heading"><strong>{config.formTitle}</strong><span>Data tersimpan di browser ini</span></div>
+        <div className="module-form-heading"><strong>{config.formTitle}</strong><span>Data tersimpan ke Supabase</span></div>
         <div className="module-fields">
           {config.fields.map((field) => (
             <label className="module-field" key={field.name}>
@@ -173,9 +199,11 @@ function DataModule({ pageId, search }) {
         </div>
         <div className="module-form-actions">
           {notice && <span className="module-save-notice" role="status">{notice}</span>}
-          <button className="button gradient" type="submit">Simpan Data</button>
+          <button className="button gradient" type="submit" disabled={saving}>{saving ? 'Menyimpan...' : 'Simpan Data'}</button>
         </div>
       </form>
+
+      {loadError && <p className="module-load-error" role="alert">{loadError}</p>}
 
       <section className="module-table-panel">
         <div className="panel-heading"><strong>Daftar {config.title.replace('Entry ', '')}</strong><span>{visibleRows.length} data</span></div>
@@ -183,8 +211,8 @@ function DataModule({ pageId, search }) {
           <table className="admin-table">
             <thead><tr>{config.columns.map((column) => <th key={column.key}>{column.label}</th>)}<th>AKSI</th></tr></thead>
             <tbody>
-              {visibleRows.length ? visibleRows.map((row) => (
-                <tr key={row.id}>{config.columns.map((column) => <td key={column.key}>{row[column.key]}</td>)}<td><button className="row-delete" type="button" onClick={() => removeRecord(row.id)}>Hapus</button></td></tr>
+              {loading ? <tr><td className="table-empty" colSpan={config.columns.length + 1}>Memuat data dari Supabase...</td></tr> : visibleRows.length ? visibleRows.map((row) => (
+                <tr key={row.id}>{config.columns.map((column) => <td key={column.key}>{Array.isArray(row[column.key]) ? row[column.key].join(', ') : row[column.key]}</td>)}<td><button className="row-delete" type="button" onClick={() => removeRecord(row.id)}>Hapus</button></td></tr>
               )) : <tr><td className="table-empty" colSpan={config.columns.length + 1}>{search ? 'Tidak ada data yang cocok dengan pencarian.' : 'Belum ada data. Isi form di atas untuk menambahkan data.'}</td></tr>}
             </tbody>
           </table>
@@ -232,7 +260,7 @@ function PrintModule({ reports = false }) {
   )
 }
 
-function AdminDashboard({ username = 'admin', onLogout }) {
+function AdminDashboard({ username = 'admin', role = 'admin', onLogout }) {
   const [activePage, setActivePage] = useState('dashboard')
   const [search, setSearch] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -268,7 +296,7 @@ function AdminDashboard({ username = 'admin', onLogout }) {
         <header className="admin-topbar">
           <button className="mobile-menu-button" type="button" onClick={() => setSidebarOpen((open) => !open)} aria-expanded={sidebarOpen}>Menu</button>
           <label className="admin-search"><span aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari data..." aria-label="Cari data" /></label>
-          <div className="admin-user"><span className="admin-avatar">{(username || 'A').slice(0, 1).toUpperCase()}</span><span><strong>{username}</strong><small>Administrator</small></span></div>
+          <div className="admin-user"><span className="admin-avatar">{(username || 'A').slice(0, 1).toUpperCase()}</span><span><strong>{username}</strong><small>{role === 'admin' ? 'Administrator' : 'Operator'}</small></span></div>
           <button className="logout-button" type="button" onClick={onLogout}>Keluar</button>
         </header>
 

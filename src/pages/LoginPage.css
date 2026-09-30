@@ -56,6 +56,14 @@
 .signin-form input:focus { border-color: #4b58dc; outline: 3px solid rgb(75 88 220 / 15%); }
 .signin-form button { min-height: 47px; margin-top: 18px; border: 0; border-radius: 9px; background: linear-gradient(100deg, #2859d5, #7735d2); color: #fff; cursor: pointer; font: inherit; font-size: 14px; font-weight: 700; }
 .signin-form button:hover { filter: brightness(1.07); }
+.signin-form button:disabled { cursor: wait; opacity: 0.7; }
+.signin-error { margin: 13px 0 0; color: #b5333d; font-size: 12px; line-height: 1.5; }
+.signin-switch { margin: 17px 0 0; color: #6d7483; font-size: 12px; text-align: center; }
+.signin-form .signin-text-button { min-height: 0; margin: 0; padding: 0; background: none; color: #4f4bc0; font: inherit; font-size: 12px; font-weight: 700; }
+.signin-form .signin-text-button:hover { filter: none; text-decoration: underline; }
+.register-form { padding-top: 28px; padding-bottom: 28px; }
+.register-form h1 { margin-bottom: 8px; }
+.register-form label { margin-top: 12px; }
 
 @media (max-width: 720px) {
   .signin-screen { padding: 18px; }

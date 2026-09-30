@@ -1,13 +1,24 @@
 import { useState } from 'react'
+import PasswordInput from '../components/PasswordInput.jsx'
 import './LoginPage.css'
 
-function Login({ onLogin }) {
+function Login({ onLogin, onShowRegister }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    onLogin({ username, password })
+    setError('')
+    setSubmitting(true)
+    try {
+      await onLogin({ username, password })
+    } catch (loginError) {
+      setError(loginError.message || 'Username atau password tidak valid.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -26,11 +37,13 @@ function Login({ onLogin }) {
         <form className="signin-form" onSubmit={handleSubmit}>
           <p className="signin-eyebrow">MASUK KE AKUN</p>
           <h1>Login Sistem</h1>
-          <label htmlFor="username">Username</label>
-          <input id="username" name="username" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Masukkan username" required />
+          <label htmlFor="login-username">Username</label>
+          <input id="login-username" name="username" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Masukkan username" required />
           <label htmlFor="password">Password</label>
-          <input id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Masukkan password" required />
-          <button type="submit">Masuk</button>
+          <PasswordInput id="password" name="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Masukkan password" required />
+          {error && <p className="signin-error" role="alert">{error}</p>}
+          <button type="submit" disabled={submitting}>{submitting ? 'Memeriksa...' : 'Masuk'}</button>
+          <p className="signin-switch">Belum memiliki akun? <button className="signin-text-button" type="button" onClick={onShowRegister}>Daftar</button></p>
         </form>
       </section>
     </main>
