@@ -81,8 +81,9 @@ const moduleDefinitions = {
       { name: 'jadwal_lama', label: 'Jadwal Lama', placeholder: 'Hari, tanggal, jam', required: true },
       { name: 'jadwal_baru', label: 'Jadwal Baru', placeholder: 'Hari, tanggal, jam', required: true },
       { name: 'status', label: 'Status', type: 'select', options: ['Menunggu', 'Disetujui', 'Ditolak'] },
+      { name: 'keterangan', label: 'Keterangan', placeholder: 'Catatan perubahan jadwal' },
     ],
-    columns: [{ key: 'mata_kuliah', label: 'MATA KULIAH' }, { key: 'dosen', label: 'DOSEN' }, { key: 'jadwal_lama', label: 'JADWAL LAMA' }, { key: 'jadwal_baru', label: 'JADWAL BARU' }, { key: 'status', label: 'STATUS' }],
+    columns: [{ key: 'mata_kuliah', label: 'MATA KULIAH' }, { key: 'dosen', label: 'DOSEN' }, { key: 'jadwal_lama', label: 'JADWAL LAMA' }, { key: 'jadwal_baru', label: 'JADWAL BARU' }, { key: 'status', label: 'STATUS' }, { key: 'keterangan', label: 'KETERANGAN' }],
   },
 }
 

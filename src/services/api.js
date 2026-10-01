@@ -81,12 +81,23 @@ export const scheduleApi = {
 }
 
 export const masterDataApi = {
-  list: (resource) => request(`/api/master/${encodeURIComponent(resource)}`),
-  create: (resource, payload) => request(`/api/master/${encodeURIComponent(resource)}`, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  }),
-  remove: (resource, id) => request(`/api/master/${encodeURIComponent(resource)}/${encodeURIComponent(id)}`, {
-    method: 'DELETE',
-  }),
+  list: async (resource) => {
+    const path = resource === 'software' ? '/api/software' : `/api/master/${encodeURIComponent(resource)}`
+    const result = await request(path)
+    return resource === 'software' ? result.data : result
+  },
+  create: async (resource, payload) => {
+    const path = resource === 'software' ? '/api/software' : `/api/master/${encodeURIComponent(resource)}`
+    const result = await request(path, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+    return resource === 'software' ? result.data : result
+  },
+  remove: (resource, id) => {
+    const path = resource === 'software'
+      ? `/api/software/${encodeURIComponent(id)}`
+      : `/api/master/${encodeURIComponent(resource)}/${encodeURIComponent(id)}`
+    return request(path, { method: 'DELETE' })
+  },
 }
