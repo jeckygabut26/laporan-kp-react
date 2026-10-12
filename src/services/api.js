@@ -11,10 +11,18 @@ async function request(path, options = {}) {
 
   if (token) headers.Authorization = `Bearer ${token}`
 
-  const response = await fetch(path, {
-    ...options,
-    headers,
-  })
+  let response
+  try {
+    response = await fetch(path, {
+      ...options,
+      headers,
+    })
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error('Tidak dapat terhubung ke server API. Jalankan `npm run dev` dari folder utama dan buka http://localhost:5173/.')
+    }
+    throw error
+  }
 
   if (response.status === 204) return null
 
