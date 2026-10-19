@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import PasswordInput from '../components/PasswordInput.jsx'
+import sttpykLogo from '../assets/sttpyk-logo.png'
 import './LoginPage.css'
 
 function RegisterPage({ onRegister, onShowLogin }) {
@@ -37,7 +38,7 @@ function RegisterPage({ onRegister, onShowLogin }) {
     <main className="signin-screen">
       <section className="signin-card" aria-label="Registrasi Sistem Jadwal Laboratorium">
         <div className="signin-promo">
-          <span className="signin-mark">LP</span>
+          <img className="signin-mark" src={sttpykLogo} alt="Logo STT Payakumbuh" />
           <div className="signin-promo-copy">
             <p>SISTEM INFORMASI</p>
             <h2>Akun Laboratorium</h2>

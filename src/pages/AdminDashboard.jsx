@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { masterDataApi } from '../services/api.js'
+import sttpykLogo from '../assets/sttpyk-logo.png'
 import SchedulePage from './SchedulePage.jsx'
 import './AdminDashboard.css'
 
@@ -277,7 +278,7 @@ function AdminDashboard({ username = 'admin', role = 'admin', onLogout }) {
     <div className="admin-shell">
       <aside className={`admin-sidebar${sidebarOpen ? ' is-open' : ''}`}>
         <a className="admin-brand" href="#dashboard" onClick={(event) => { event.preventDefault(); navigate('dashboard') }}>
-          <span className="admin-brand-mark">LP</span>
+          <img className="admin-brand-mark" src={sttpykLogo} alt="Logo STT Payakumbuh" />
           <span><small>SISTEM INFORMASI</small><strong>Laboratorium STT<br />Payakumbuh</strong></span>
         </a>
         <nav className="admin-nav" aria-label="Navigasi utama">
