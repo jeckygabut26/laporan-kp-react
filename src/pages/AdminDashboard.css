@@ -1,7 +1,7 @@
 .admin-shell { display: grid; min-height: 100svh; grid-template-columns: 290px minmax(0, 1fr); background: #f1f4ff; color: #192235; }
 .admin-sidebar { position: sticky; top: 0; display: flex; height: 100svh; flex-direction: column; padding: 25px 20px 18px; background: #11192c; color: #edf1ff; }
 .admin-brand { display: flex; min-height: 126px; align-items: center; justify-content: center; gap: 15px; padding: 8px 5px 23px; border-bottom: 1px solid rgb(218 226 255 / 14%); color: inherit; text-align: center; text-decoration: none; }
-.admin-brand-mark { display: grid; width: 48px; height: 48px; flex: 0 0 auto; place-items: center; border-radius: 15px; background: linear-gradient(145deg, #4382ff, #8146dc); box-shadow: 0 8px 22px rgb(65 88 220 / 32%); color: #fff; font-size: 16px; font-weight: 800; }
+.admin-brand-mark { display: block; width: 48px; height: 48px; flex: 0 0 auto; border-radius: 9px; background: #fff; object-fit: contain; }
 .admin-brand small, .admin-brand strong { display: block; }
 .admin-brand small { margin-bottom: 8px; color: #9db6e9; font-size: 10px; letter-spacing: 0.12em; }
 .admin-brand strong { font-size: 15px; line-height: 1.5; }

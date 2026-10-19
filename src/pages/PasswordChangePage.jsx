@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import PasswordInput from '../components/PasswordInput.jsx'
+import sttpykLogo from '../assets/sttpyk-logo.png'
 import './PasswordChangePage.css'
 
 function PasswordChangePage({ username, onSubmit, onLogout }) {
@@ -36,7 +37,7 @@ function PasswordChangePage({ username, onSubmit, onLogout }) {
     <main className="password-change-screen">
       <section className="password-change-card" aria-labelledby="password-change-title">
         <header className="password-change-header">
-          <span className="password-change-mark">LP</span>
+          <img className="password-change-mark" src={sttpykLogo} alt="Logo STT Payakumbuh" />
           <div>
             <p>SISTEM INFORMASI</p>
             <strong>Laboratorium STT Payakumbuh</strong>

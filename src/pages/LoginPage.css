@@ -29,15 +29,13 @@
 }
 
 .signin-mark {
-  display: grid;
+  display: block;
   width: 74px;
   height: 74px;
-  place-items: center;
+  object-fit: contain;
   border: 1px solid rgb(255 255 255 / 25%);
   border-radius: 20px;
-  background: rgb(255 255 255 / 9%);
-  font-size: 27px;
-  font-weight: 700;
+  background: #fff;
 }
 
 .signin-promo-copy { max-width: 500px; margin: 24px auto 0; text-align: center; }
@@ -69,7 +67,7 @@
   .signin-screen { padding: 18px; }
   .signin-card { max-width: 520px; grid-template-columns: 1fr; border-radius: 19px; }
   .signin-promo { min-height: 300px; padding: 24px; }
-  .signin-mark { width: 54px; height: 54px; border-radius: 15px; font-size: 21px; }
+  .signin-mark { width: 54px; height: 54px; border-radius: 15px; }
   .signin-promo-copy { margin-top: 24px; }
   .signin-promo-copy h2 { font-size: 28px; }
   .signin-promo-copy > span { font-size: 14px; }
