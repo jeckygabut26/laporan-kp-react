@@ -42,10 +42,6 @@ async function request(path, options = {}) {
 }
 
 export const authApi = {
-  signUp: (credentials) => request('/user-management/users/sign-up', {
-    method: 'POST',
-    body: JSON.stringify(credentials),
-  }),
   signIn: async (credentials) => {
     const session = await request('/user-management/users/sign-in', {
       method: 'POST',

@@ -3,7 +3,7 @@ import PasswordInput from '../components/PasswordInput.jsx'
 import sttpykLogo from '../assets/sttpyk-logo.png'
 import './LoginPage.css'
 
-function Login({ onLogin, onShowRegister }) {
+function Login({ onLogin }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -44,7 +44,6 @@ function Login({ onLogin, onShowRegister }) {
           <PasswordInput id="password" name="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Masukkan password" required />
           {error && <p className="signin-error" role="alert">{error}</p>}
           <button type="submit" disabled={submitting}>{submitting ? 'Memeriksa...' : 'Masuk'}</button>
-          <p className="signin-switch">Belum memiliki akun? <button className="signin-text-button" type="button" onClick={onShowRegister}>Daftar</button></p>
         </form>
       </section>
     </main>

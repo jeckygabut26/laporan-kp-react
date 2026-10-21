@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { masterDataApi } from '../services/api.js'
+import { masterDataApi, scheduleApi } from '../services/api.js'
 import sttpykLogo from '../assets/sttpyk-logo.png'
 import SchedulePage from './SchedulePage.jsx'
 import './AdminDashboard.css'
@@ -224,40 +224,157 @@ function DataModule({ pageId, search }) {
   )
 }
 
-function PrintModule({ reports = false }) {
-  const title = reports ? 'Cetak Laporan & Pratinjau' : 'Cetak Jadwal'
-  const [report, setReport] = useState('Jadwal Laboratorium')
-  const reportOptions = ['Jadwal Laboratorium', 'Kuliah Pengganti', 'Rekap Penggunaan Ruang']
+const printReports = {
+  schedule: {
+    title: 'Jadwal Laboratorium',
+    columns: [
+      { key: 'hari', label: 'HARI' },
+      { key: 'jam', label: 'JAM' },
+      { key: 'nama_labor', label: 'LABORATORIUM', fallback: 'kode_labor' },
+      { key: 'nama_mk', label: 'MATA KULIAH' },
+      { key: 'sks', label: 'SKS' },
+      { key: 'nama_dosen', label: 'DOSEN' },
+      { key: 'kelas', label: 'KELAS' },
+      { key: 'semester', label: 'SEMESTER' },
+    ],
+  },
+  replacements: {
+    title: 'Kuliah Pengganti',
+    columns: [
+      { key: 'mata_kuliah', label: 'MATA KULIAH' },
+      { key: 'dosen', label: 'DOSEN' },
+      { key: 'jadwal_lama', label: 'JADWAL LAMA' },
+      { key: 'jadwal_baru', label: 'JADWAL BARU' },
+      { key: 'status', label: 'STATUS' },
+      { key: 'keterangan', label: 'KETERANGAN' },
+    ],
+  },
+  rooms: {
+    title: 'Rekap Penggunaan Laboratorium',
+    columns: [
+      { key: 'laboratorium', label: 'LABORATORIUM' },
+      { key: 'jumlah_jadwal', label: 'JUMLAH JADWAL' },
+    ],
+  },
+}
 
-  function copyPreview() {
-    navigator.clipboard?.writeText(`${report}\nBelum ada data untuk dicetak.`)
+function PrintModule({ reports = false }) {
+  const [report, setReport] = useState('schedule')
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [notice, setNotice] = useState('')
+  const reportId = reports ? report : 'schedule'
+  const config = printReports[reportId]
+
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    setLoadError('')
+    setNotice('')
+
+    const loadData = reportId === 'replacements'
+      ? masterDataApi.list('replacements')
+      : scheduleApi.list()
+
+    loadData
+      .then((result) => { if (active) setRows(Array.isArray(result) ? result : []) })
+      .catch((error) => { if (active) setLoadError(error.message) })
+      .finally(() => { if (active) setLoading(false) })
+
+    return () => { active = false }
+  }, [reportId])
+
+  const previewRows = reportId === 'rooms'
+    ? Object.values(rows.reduce((rooms, row) => {
+      const name = row.nama_labor || row.kode_labor || 'Tidak tercatat'
+      rooms[name] = { laboratorium: name, jumlah_jadwal: (rooms[name]?.jumlah_jadwal || 0) + 1 }
+      return rooms
+    }, {})).sort((first, second) => second.jumlah_jadwal - first.jumlah_jadwal)
+    : rows
+
+  function cellValue(row, column) {
+    const value = row[column.key] ?? (column.fallback ? row[column.fallback] : undefined)
+    if (value === undefined || value === null || value === '') return '-'
+    return Array.isArray(value) ? value.join(', ') : value
   }
+
+  async function copyPreview() {
+    const content = [
+      config.title,
+      config.columns.map((column) => column.label).join('\t'),
+      ...previewRows.map((row) => config.columns.map((column) => cellValue(row, column)).join('\t')),
+    ].join('\n')
+
+    try {
+      await navigator.clipboard.writeText(content)
+      setNotice('Pratinjau berhasil disalin.')
+    } catch {
+      setNotice('Clipboard tidak tersedia di browser ini.')
+    }
+  }
+
+  const printedAt = new Date().toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 
   return (
     <>
-      <section className="module-heading"><div><p className="module-eyebrow">CETAK</p><h1>{title}</h1></div></section>
-      {reports ? (
-        <section className="report-card">
-          <p>Pilih jenis laporan untuk melihat pratinjau sebelum dicetak.</p>
-          <div className="report-controls">
-            <select value={report} onChange={(event) => setReport(event.target.value)} aria-label="Jenis laporan">{reportOptions.map((item) => <option key={item}>{item}</option>)}</select>
-            <button className="button gradient" type="button" onClick={() => window.print()}>Cetak Laporan</button>
-          </div>
-        </section>
-      ) : (
-        <section className="module-table-panel print-panel">
-          <div className="print-toolbar">
-            <div className="print-actions">
-              <button className="button neutral" type="button" onClick={copyPreview}>Copy</button>
-              <button className="button neutral" type="button" onClick={() => window.print()}>PDF</button>
-              <button className="button gradient" type="button" onClick={() => window.print()}>Print</button>
+      <section className="module-heading">
+        <div><p className="module-eyebrow">CETAK</p><h1>{reports ? 'Cetak Laporan' : 'Cetak Jadwal'}</h1></div>
+      </section>
+      <section className="report-card print-controls">
+        <p>{reports ? 'Pilih laporan untuk melihat data dari Supabase sebelum dicetak.' : 'Jadwal laboratorium dari Supabase siap dicetak atau disimpan sebagai PDF.'}</p>
+        <div className="report-controls">
+          {reports && (
+            <select value={report} onChange={(event) => setReport(event.target.value)} aria-label="Jenis laporan">
+              <option value="schedule">Jadwal Laboratorium</option>
+              <option value="replacements">Kuliah Pengganti</option>
+              <option value="rooms">Rekap Penggunaan Laboratorium</option>
+            </select>
+          )}
+          <button className="button neutral" type="button" onClick={copyPreview} disabled={loading || Boolean(loadError)}>Salin</button>
+          <button className="button gradient" type="button" onClick={() => window.print()} disabled={loading || Boolean(loadError)}>Cetak / PDF</button>
+        </div>
+      </section>
+      {loadError && <p className="module-load-error" role="alert">{loadError}</p>}
+      {notice && <p className="module-save-notice" role="status">{notice}</p>}
+      <section className="module-table-panel print-preview-panel">
+        <header className="print-document-heading">
+          <p>SISTEM INFORMASI LABORATORIUM STT PAYAKUMBUH</p>
+          <h2>{config.title}</h2>
+          <span>Tanggal cetak: {printedAt}</span>
+        </header>
+        <div className="panel-heading"><strong>{config.title}</strong><span>{loading ? 'Memuat...' : `${previewRows.length} data`}</span></div>
+        <div className="table-overflow">
+          <table className="admin-table">
+            <thead><tr>{config.columns.map((column) => <th key={column.key}>{column.label}</th>)}</tr></thead>
+            <tbody>
+              {loading ? (
+                <tr><td className="table-empty" colSpan={config.columns.length}>Memuat data dari Supabase...</td></tr>
+              ) : previewRows.length ? previewRows.map((row, index) => (
+                <tr key={row.id ?? `${reportId}-${index}`}>
+                  {config.columns.map((column) => <td key={column.key}>{cellValue(row, column)}</td>)}
+                </tr>
+              )) : (
+                <tr><td className="table-empty" colSpan={config.columns.length}>Belum ada data untuk laporan ini.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        {reportId === 'schedule' && (
+          <footer className="schedule-approval">
+            <div className="schedule-approval-signature">
+              <p>Payakumbuh, {printedAt}</p>
+              <p>Disetujui oleh,<br /><strong>Ketua Laboratorium STT Payakumbuh</strong></p>
+              <div className="schedule-approval-space" aria-hidden="true" />
+              <strong className="schedule-approval-name">Ramzil Huda, S.Kom., M.Kom</strong>
             </div>
-            <span className="print-count">0 data</span>
-          </div>
-          <div className="panel-heading"><strong>Preview Jadwal</strong><span>Jadwal Laboratorium</span></div>
-          <div className="table-overflow"><table className="admin-table"><thead><tr>{['HARI', 'JAM', 'RUANG', 'MATA KULIAH', 'DOSEN', 'KELAS'].map((item) => <th key={item}>{item}</th>)}</tr></thead><tbody><tr><td className="table-empty" colSpan="6">Belum ada data jadwal untuk ditampilkan.</td></tr></tbody></table></div>
-        </section>
-      )}
+          </footer>
+        )}
+      </section>
     </>
   )
 }

@@ -76,6 +76,16 @@
 .report-controls { display: flex; min-width: min(430px, 48%); gap: 10px; }
 .report-controls select { flex: 1; }
 .print-panel { padding-bottom: 5px; }
+.print-controls { margin-bottom: 17px; }
+.print-document-heading { padding: 24px 20px 14px; text-align: center; }
+.print-document-heading p { margin: 0 0 7px; color: #536074; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; }
+.print-document-heading h2 { margin: 0 0 6px; color: #192235; font-size: 22px; }
+.print-document-heading span { color: #687487; font-size: 11px; }
+.schedule-approval { display: flex; justify-content: flex-end; margin: 38px 24px 20px; color: #111; }
+.schedule-approval-signature { width: 270px; font-size: 12px; line-height: 1.5; text-align: center; }
+.schedule-approval-signature p { margin: 0 0 4px; }
+.schedule-approval-space { height: 70px; }
+.schedule-approval-name { display: block; text-decoration: underline; }
 .print-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 17px 20px 10px; }
 .print-actions { display: flex; flex-wrap: wrap; gap: 9px; }
 .print-count { color: #687487; font-size: 13px; }
@@ -141,8 +151,17 @@
 }
 
 @media print {
-  .admin-sidebar, .admin-topbar, .admin-footer, .module-form, .module-heading > .button, .print-actions { display: none !important; }
+  @page { size: A4 landscape; margin: 12mm; }
+  body { background: #fff !important; }
+  .admin-sidebar, .admin-topbar, .admin-footer, .module-form, .module-heading, .print-controls, .print-toolbar, .sidebar-scrim { display: none !important; }
   .admin-shell { display: block; background: #fff; }
-  .admin-content { width: 100%; padding: 0; }
-  .module-table-panel { border: 0; box-shadow: none; }
+  .admin-main-column, .admin-content { width: 100%; min-height: 0; margin: 0; padding: 0; }
+  .print-preview-panel { overflow: visible; margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+  .print-document-heading { padding: 0 0 15px; }
+  .table-overflow { overflow: visible; }
+  .admin-table { min-width: 0; }
+  .admin-table th, .admin-table td { padding: 8px; color: #111; font-size: 10px; }
+  .print-preview-panel thead { display: table-header-group; }
+  .print-preview-panel tr { break-inside: avoid; page-break-inside: avoid; }
+  .schedule-approval { break-inside: avoid; page-break-inside: avoid; margin: 12mm 12mm 0; }
 }
