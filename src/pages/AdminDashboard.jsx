@@ -264,6 +264,7 @@ function PrintModule({ reports = false }) {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [notice, setNotice] = useState('')
+  const [exporting, setExporting] = useState(false)
   const reportId = reports ? report : 'schedule'
   const config = printReports[reportId]
 
@@ -320,13 +321,97 @@ function PrintModule({ reports = false }) {
     year: 'numeric',
   })
 
+  async function downloadPdf() {
+    setExporting(true)
+    setNotice('')
+
+    try {
+      const [{ jsPDF }, { default: autoTable }] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+      ])
+      const pdf = new jsPDF({
+        orientation: reportId === 'rooms' ? 'portrait' : 'landscape',
+        unit: 'mm',
+        format: 'a4',
+        compress: true,
+      })
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const pageHeight = pdf.internal.pageSize.getHeight()
+      const margin = 12
+
+      function drawPageHeading(pageNumber) {
+        pdf.setTextColor(28, 38, 58)
+        pdf.setFont('helvetica', 'bold')
+        pdf.setFontSize(10)
+        pdf.text('SISTEM INFORMASI LABORATORIUM STT PAYAKUMBUH', pageWidth / 2, 13, { align: 'center' })
+        pdf.setFontSize(15)
+        pdf.text(config.title, pageWidth / 2, 21, { align: 'center' })
+        pdf.setFont('helvetica', 'normal')
+        pdf.setFontSize(9)
+        pdf.text(`Tanggal cetak: ${printedAt}`, pageWidth / 2, 27, { align: 'center' })
+        pdf.setTextColor(100)
+        pdf.setFontSize(8)
+        pdf.text(`Halaman ${pageNumber}`, pageWidth - margin, pageHeight - 6, { align: 'right' })
+      }
+
+      const body = previewRows.length
+        ? previewRows.map((row) => config.columns.map((column) => String(cellValue(row, column))))
+        : [[{ content: 'Belum ada data untuk laporan ini.', colSpan: config.columns.length, styles: { halign: 'center' } }]]
+
+      autoTable(pdf, {
+        startY: 34,
+        head: [config.columns.map((column) => column.label)],
+        body,
+        margin: { top: 34, right: margin, bottom: 12, left: margin },
+        theme: 'grid',
+        styles: { font: 'helvetica', fontSize: 8, cellPadding: 2, overflow: 'linebreak', valign: 'middle' },
+        headStyles: { fillColor: [34, 49, 74], textColor: 255, fontStyle: 'bold' },
+        rowPageBreak: 'avoid',
+        didDrawPage: ({ pageNumber }) => drawPageHeading(pageNumber),
+      })
+
+      if (reportId === 'schedule') {
+        const signatureHeight = 44
+        let signatureTop = pdf.lastAutoTable.finalY + 10
+
+        if (signatureTop + signatureHeight > pageHeight - margin) {
+          pdf.addPage()
+          signatureTop = 42
+          drawPageHeading(pdf.internal.getNumberOfPages())
+        }
+
+        const signatureCenter = pageWidth - margin - 42
+        pdf.setTextColor(20)
+        pdf.setFont('helvetica', 'normal')
+        pdf.setFontSize(10)
+        pdf.text(`Payakumbuh, ${printedAt}`, signatureCenter, signatureTop, { align: 'center' })
+        pdf.text('Disetujui oleh,', signatureCenter, signatureTop + 6, { align: 'center' })
+        pdf.setFont('helvetica', 'bold')
+        pdf.setFontSize(9)
+        pdf.text('Ketua Laboratorium STT Payakumbuh', signatureCenter, signatureTop + 12, { align: 'center' })
+        pdf.setDrawColor(40)
+        pdf.line(signatureCenter - 31, signatureTop + 34, signatureCenter + 31, signatureTop + 34)
+        pdf.text('Ramzil Huda, S.Kom., M.Kom', signatureCenter, signatureTop + 40, { align: 'center' })
+      }
+
+      const fileName = `${config.title.toLocaleLowerCase('id-ID').replace(/[^a-z0-9]+/g, '-')}-${new Date().toISOString().slice(0, 10)}.pdf`
+      pdf.save(fileName)
+      setNotice(`PDF berhasil dibuat: ${fileName}`)
+    } catch (error) {
+      setNotice(`PDF gagal dibuat: ${error.message}`)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <>
       <section className="module-heading">
         <div><p className="module-eyebrow">CETAK</p><h1>{reports ? 'Cetak Laporan' : 'Cetak Jadwal'}</h1></div>
       </section>
       <section className="report-card print-controls">
-        <p>{reports ? 'Pilih laporan untuk melihat data dari Supabase sebelum dicetak.' : 'Jadwal laboratorium dari Supabase siap dicetak atau disimpan sebagai PDF.'}</p>
+        <p>{reports ? 'Pilih laporan dari Supabase untuk diunduh sebagai PDF.' : 'Jadwal laboratorium dari Supabase siap diunduh sebagai PDF A4 landscape.'}</p>
         <div className="report-controls">
           {reports && (
             <select value={report} onChange={(event) => setReport(event.target.value)} aria-label="Jenis laporan">
@@ -336,7 +421,7 @@ function PrintModule({ reports = false }) {
             </select>
           )}
           <button className="button neutral" type="button" onClick={copyPreview} disabled={loading || Boolean(loadError)}>Salin</button>
-          <button className="button gradient" type="button" onClick={() => window.print()} disabled={loading || Boolean(loadError)}>Cetak / PDF</button>
+          <button className="button gradient" type="button" onClick={downloadPdf} disabled={loading || Boolean(loadError) || exporting}>{exporting ? 'Membuat PDF...' : 'Unduh PDF'}</button>
         </div>
       </section>
       {loadError && <p className="module-load-error" role="alert">{loadError}</p>}
